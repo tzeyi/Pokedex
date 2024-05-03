@@ -1,41 +1,42 @@
 import type { MetaFunction } from "@remix-run/node";
+import SearchBar from "~/components/ui/SearchBar";
+import { json } from "@remix-run/node";
+import { getAllPokemon } from "~/server";
+
+import {
+  Form,
+  Link,
+  Links,
+  ScrollRestoration,
+  useLoaderData,
+} from "@remix-run/react";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Pokedex" },
+    { name: "description", content: "Pokedex!" },
   ];
 };
 
+export const loader = async () => {
+  const pokemon = await getAllPokemon();
+  console.log(pokemon)
+  return json({pokemon})
+}
+ 
+
 export default function Index() {
+  const pokemon = useLoaderData<typeof loader>();
+  // const data = JSON.stringify(pokemon);
+
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to Remix</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div className="flex flex-col p-3">
+      <div className="flex">
+        <h1 className="text-3xl px-2 font-bold text-red-600"> Pokedex </h1>
+        <SearchBar></SearchBar>
+      </div>
+
+      <p> { JSON.stringify(pokemon) } </p>
     </div>
   );
 }
