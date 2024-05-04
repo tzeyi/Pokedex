@@ -29,8 +29,8 @@ const queryPokemonAll = gql `
 `
 
 const queryPokemonById = gql`
-    query PokeAPIquery($searchQuery: Int!) {
-        pokemon_v2_pokemon(where: {id: {_eq: $searchQuery}}) {
+    query PokeAPIquery($searchQuery: String!) {
+        pokemon_v2_pokemon(where: {name: {_eq: $searchQuery}}, limit: 7) {
             id
             name
             pokemon_v2_pokemontypes {
@@ -46,11 +46,25 @@ const queryPokemonById = gql`
 `
 
 // REST Api
-export async function getAllPokemon() {
+export async function getPokemonAll() {
   const data = await client.request(queryPokemonAll)
   return data
 }
 
+// For search bar
+export async function getPokemonsByName(name: string) {
+  const response: PokemonResponse = await client.request(queryPokemonById, {searchQuery: name + '%'})
+  const pokemonInfo: Pokemon[] = response.pokemon_v2_pokemon
+
+  const cleanPokemon = pokemonInfo.map(pokemon => ({
+    'id': pokemon.id,
+    'name': pokemon.name
+  }))
+
+  return cleanPokemon
+}
+
+// For search bar
 export async function getPokemonById(id: number) {
   const response: PokemonResponse = await client.request(queryPokemonById, {searchQuery: id})
   const pokemonInfo: Pokemon = response.pokemon_v2_pokemon[0]
@@ -62,7 +76,9 @@ export async function getPokemonById(id: number) {
       'type': pokemonInfo.pokemon_v2_pokemontypes[0],
       'sprite': pokemonInfo.pokemon_v2_pokemonsprites[0],
   }
-}  
+}
+
+
 
 
 
