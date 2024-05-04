@@ -11,7 +11,8 @@ import {
   Outlet,
   ScrollRestoration,
   useLoaderData,
-  useSubmit
+  useSubmit,
+  NavLink
 } from "@remix-run/react";
 
 import { useEffect } from "react";
@@ -28,8 +29,8 @@ export const loader = async ({
 } : LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
-  const input = q + "%"
-  const pokemons = await getPokemonsByName(input);
+  const query = q + "%"
+  const pokemons = await getPokemonsByName(query);
 
   return json({ pokemons, q });
 };
@@ -39,7 +40,7 @@ export default function Index() {
   const { pokemons, q } = useLoaderData<typeof loader>();
 
   return (
-    <main className="md:flex flex-col p-3">
+    <main className="flex flex-col p-3">
       <section className="flex">
         <h1 className="text-3xl px-3 font-bold text-red-600"> Pokedex </h1>
         <div className="flex-grow">
@@ -49,7 +50,7 @@ export default function Index() {
       </section>
 
       <section>
-
+        <h1> Pokemon Owned </h1>
       </section>
 
       <Outlet></Outlet>
@@ -59,16 +60,15 @@ export default function Index() {
 
 // Search Bar
 function SearchBar() {
-  const pokemons = useLoaderData<typeof loader>()
-  const { q } = useLoaderData<typeof loader>()
+  const { pokemons, q } = useLoaderData<typeof loader>();
   const submit = useSubmit()
-  console.log(JSON.stringify(pokemons.pokemons))
 
   useEffect(() => {
     const searchField = document.getElementById("q");
     if (searchField instanceof HTMLInputElement) {
       searchField.value = q || "";
     }
+    console.log(q)
   }, [q])
 
   return (
@@ -95,7 +95,25 @@ function SearchBar() {
         </Form>
       </div>
 
-      <h1> { JSON.stringify(pokemons) } </h1>
+      <nav>
+      {pokemons.length ? (
+          <ul>
+            {pokemons.map((pokemon) => (
+              <li key={pokemon.id}>
+                <NavLink to={`pokemons/${pokemon.id}`}>
+                  <>
+                    {pokemon.name}
+                  </>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>
+            <i>No such Pokemon</i>
+          </p>
+        )}
+        </nav>
     </>
 
   );

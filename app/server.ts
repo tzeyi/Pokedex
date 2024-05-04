@@ -1,6 +1,6 @@
-import { gql } from 'graphql-request';
 import { client } from './lib/graphql-client';
 import { Pokemon, PokemonResponse } from "~/model/Pokemon";
+import { queryPokemonAll, queryPokemonById, queryPokemonByName } from './routes/query';
 
 // Documentation:
 // https://medium.com/@elijahbanjo/understanding-graphql-apis-from-a-rest-api-point-of-view-08196600c667 (REST vs GraphQL)
@@ -11,56 +11,6 @@ import { Pokemon, PokemonResponse } from "~/model/Pokemon";
 //       Mutation in graphQL can simulate POST/UPDATE requests
 //       GraphQL use resolvers for server side functionalities
 
-const queryPokemonAll = gql `
-  query PokeAPIquery {
-    pokemon_v2_pokemon(limit: 1) {
-      id
-      name
-      pokemon_v2_pokemontypes {
-        pokemon_v2_type {
-          name
-        }
-      }
-      pokemon_v2_pokemonsprites {
-        sprites
-      }
-    }
-  }
-`
-
-const queryPokemonById = gql`
-    query PokeAPIquery($searchQuery: Int!) {
-        pokemon_v2_pokemon(where: {id: {_eq: $searchQuery}}) {
-            id
-            name
-            pokemon_v2_pokemontypes {
-                pokemon_v2_type {
-                name
-                }
-            }
-            pokemon_v2_pokemonsprites {
-                sprites(path: "other.dream_world.front_default")
-            }
-        }
-    }
-`
-
-const queryPokemonByName = gql`
-  query PokeAPIquery($searchQuery: String!) {
-    pokemon_v2_pokemon(where: {name: {_like: $searchQuery}}, limit: 7) {
-        id
-        name
-        pokemon_v2_pokemontypes {
-            pokemon_v2_type {
-            name
-            }
-        }
-        pokemon_v2_pokemonsprites {
-            sprites(path: "other.dream_world.front_default")
-        }
-    }
-  }
-`
 
 // REST Api
 export async function getPokemonAll() {
@@ -70,6 +20,10 @@ export async function getPokemonAll() {
 
 // For search bar
 export async function getPokemonsByName(name: string) {
+  // if (name != "") {
+  //   name = name + "%"
+  // }
+
   const response: PokemonResponse = await client.request(queryPokemonByName, {searchQuery: name})
   const pokemonInfo: Pokemon[] = response.pokemon_v2_pokemon
 
@@ -94,11 +48,6 @@ export async function getPokemonById(id: number) {
       'sprite': pokemonInfo.pokemon_v2_pokemonsprites[0],
   }
 }
-
-
-
-
-
 
 
 
