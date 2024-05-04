@@ -4,7 +4,7 @@ import { getPokemonById} from "~/server";
 import invariant from "tiny-invariant";
 
 export const loader = async ( { params } : LoaderFunctionArgs) => {
-    invariant(params.contactId, "Missing contactId param");  // Error Check
+    invariant(params.id, "Missing id param");  // Error Check
     const id = Number(params.id)
     const pokemon = await getPokemonById(id);
 

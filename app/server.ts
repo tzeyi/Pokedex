@@ -29,8 +29,8 @@ const queryPokemonAll = gql `
 `
 
 const queryPokemonById = gql`
-    query PokeAPIquery($searchQuery: String!) {
-        pokemon_v2_pokemon(where: {name: {_eq: $searchQuery}}, limit: 7) {
+    query PokeAPIquery($searchQuery: Int!) {
+        pokemon_v2_pokemon(where: {id: {_eq: $searchQuery}}) {
             id
             name
             pokemon_v2_pokemontypes {
@@ -45,6 +45,23 @@ const queryPokemonById = gql`
     }
 `
 
+const queryPokemonByName = gql`
+  query PokeAPIquery($searchQuery: String!) {
+    pokemon_v2_pokemon(where: {name: {_like: $searchQuery}}, limit: 7) {
+        id
+        name
+        pokemon_v2_pokemontypes {
+            pokemon_v2_type {
+            name
+            }
+        }
+        pokemon_v2_pokemonsprites {
+            sprites(path: "other.dream_world.front_default")
+        }
+    }
+  }
+`
+
 // REST Api
 export async function getPokemonAll() {
   const data = await client.request(queryPokemonAll)
@@ -53,7 +70,7 @@ export async function getPokemonAll() {
 
 // For search bar
 export async function getPokemonsByName(name: string) {
-  const response: PokemonResponse = await client.request(queryPokemonById, {searchQuery: name + '%'})
+  const response: PokemonResponse = await client.request(queryPokemonByName, {searchQuery: name})
   const pokemonInfo: Pokemon[] = response.pokemon_v2_pokemon
 
   const cleanPokemon = pokemonInfo.map(pokemon => ({
