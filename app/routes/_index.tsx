@@ -1,5 +1,4 @@
 import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/node";
-// import SearchBar from "~/components/ui/SearchBar";
 import { json } from "@remix-run/node";
 import { getPokemonsByName } from "~/server";
 import { Input } from "~/components/ui/input"
@@ -11,7 +10,17 @@ import {
   TableRow,
 } from "~/components/ui/table"
 import { Badge } from "~/components/ui/badge"
-
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "~/components/ui/command"
 
 import {
   Form,
@@ -33,20 +42,20 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// export const loader = async ({
-//   request,
-// } : LoaderFunctionArgs) => {
-//   const url = new URL(request.url);
-//   const q = url.searchParams.get("q");
-//   const query = q + "%"
-//   const pokemons = await getPokemonsByName(query);
+export const loader = async ({
+  request,
+} : LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const q = url.searchParams.get("q");
+  const query = q + "%"
+  const pokemons = await getPokemonsByName(query);
 
-//   return json({ pokemons, q });
-// };
+  return json({ pokemons, q });
+};
 
  
 export default function Index() {
-  // const { pokemons, q } = useLoaderData<typeof loader>();
+  const { pokemons, q } = useLoaderData<typeof loader>();
 
   return (
     <main className="flex flex-col p-3">
@@ -96,61 +105,62 @@ export default function Index() {
 
 // Search Bar
 function SearchBar() {
-  // const { pokemons, q } = useLoaderData<typeof loader>();
-  // const submit = useSubmit()
+  const { pokemons, q } = useLoaderData<typeof loader>();
+  const submit = useSubmit()
 
-  // useEffect(() => {
-  //   const searchField = document.getElementById("q");
-  //   if (searchField instanceof HTMLInputElement) {
-  //     searchField.value = q || "";
-  //   }
-  //   console.log(q)
-  // }, [q])
+  useEffect(() => {
+    const searchField = document.getElementById("q");
+    if (searchField instanceof HTMLInputElement) {
+      searchField.value = q || "";
+    }
+    console.log(q)
+  }, [q])
 
   return (
     <>
       <div>
-        <Form 
-          // onChange={(event) => {
-          //   console.log(event)
-          //   const isFirstSearch = q === null;
-          //   submit(event.currentTarget, {
-          //     replace: !isFirstSearch,
-          //   });
-          // }}
-          // role="search"
-        >
+        <Command className="rounded-lg border shadow-md">
+          <Form           
+            onChange={(event) => {
+            console.log(event)
+            const isFirstSearch = q === null;
+            submit(event.currentTarget, {
+              replace: !isFirstSearch,
+            });
+          }}
+          role="search">
+
           <Input 
             type="search" 
             aria-label="Search pokemon"
-            // defaultValue={q || ""}
+            defaultValue={q || ""}
             placeholder="Search"
             name="q"
-          >
-          </Input>
-        </Form>
+          />
+          </Form>
+
+          <nav>
+            {pokemons.length ? (
+                <CommandList>
+                  {pokemons.map((pokemon) => (
+                    <NavLink to={`pokemons/${pokemon.id}`}>
+                      <>
+                        <CommandItem key={pokemon.id}>
+                            {pokemon.name}
+                        </CommandItem>
+                      </>
+                    </NavLink>
+                  ))}
+                </CommandList>
+              ) : (
+                <p>
+                  <i>No such Pokemon</i>
+                </p>
+              )
+            }
+          </nav>
+       </Command>
       </div>
-
-      {/* <nav>
-      {pokemons.length ? (
-          <ul>
-            {pokemons.map((pokemon) => (
-              <li key={pokemon.id}>
-                <NavLink to={`pokemons/${pokemon.id}`}>
-                  <>
-                    {pokemon.name}
-                  </>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>
-            <i>No such Pokemon</i>
-          </p>
-        )}
-        </nav> */}
     </>
-
   );
 }

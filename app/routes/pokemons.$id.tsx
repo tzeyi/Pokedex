@@ -12,21 +12,22 @@ import {
 } from "~/components/ui/card"
 import { Button } from "~/components/ui/button"
 
-// export const loader = async ( { params } : LoaderFunctionArgs) => {
-//     invariant(params.id, "Missing id param");  // Error Check
-//     const id = Number(params.id)
-//     const pokemon = await getPokemonById(id);
+export const loader = async ( { params } : LoaderFunctionArgs) => {
+    invariant(params.id, "Missing id param");  // Error Check
+    const id = Number(params.id)
+    const pokemon = await getPokemonById(id);
 
-//     if (!pokemon) {
-//         throw new Response("Not Found", { status: 404 })
-//     }
+    if (!pokemon) {
+        throw new Response("Not Found", { status: 404 })
+    }
 
-//     return pokemon
-// }
+    return pokemon
+}
 
 
 export default function PokemonPage() {
-    // const pokemon= useLoaderData<typeof loader>();
+    const pokemon= useLoaderData<typeof loader>();
+    console.log(pokemon)
 
     return (
         <main className = "max-w-lg mx-auto">
