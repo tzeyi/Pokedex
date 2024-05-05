@@ -12,14 +12,9 @@ import {
 import { Badge } from "~/components/ui/badge"
 import {
   Command,
-  CommandDialog,
   CommandEmpty,
-  CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
 } from "~/components/ui/command"
 
 import {
@@ -153,14 +148,13 @@ function SearchBar() {
                   ))}
                 </CommandList>
               ) : (
-                <p>
-                  <i>No such Pokemon</i>
-                </p>
+                <CommandEmpty>No results found.</CommandEmpty>
               )
             }
           </nav>
        </Command>
       </div>
+
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, json } from "@remix-run/react";
-import { getPokemonById} from "~/server";
+import { useLoaderData, json, Form } from "@remix-run/react";
+import { createPokemon, getPokemonById} from "~/server";
 import invariant from "tiny-invariant";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
@@ -11,6 +11,14 @@ import {
     CardTitle,
 } from "~/components/ui/card"
 import { Button } from "~/components/ui/button"
+import { Badge } from "~/components/ui/badge"
+import { typeColors } from "~/model/typeColors";
+
+
+export const action = async() => {
+    const contact = await createPokemon()
+    return json({ contact })
+}
 
 export const loader = async ( { params } : LoaderFunctionArgs) => {
     invariant(params.id, "Missing id param");  // Error Check
@@ -27,32 +35,39 @@ export const loader = async ( { params } : LoaderFunctionArgs) => {
 
 export default function PokemonPage() {
     const pokemon= useLoaderData<typeof loader>();
-    console.log(pokemon)
 
     return (
         <main className = "max-w-lg mx-auto">
-            <h1 className = "sfont-bold my-4"> pikachu </h1>
-            <p> JSON.stringify(pokemon)</p>
+            <h1 className = "sfont-bold my-4"> {pokemon.name} </h1>
 
             <section className="flex flex-row">
                     <div className="flex-1">
-                        <img src = "https://i.pinimg.com/originals/bf/95/34/bf953419d76bf747cba69b55e6e03957.png" ></img>  
+                        <img src = {pokemon.sprite.sprites} ></img>  
                     </div>
 
                     <div className="flex-1">
                         <div className="flex"> 
-                            <h1 className="text-red-500"> Electric </h1>
-                            <h1 className="text-yellow-500"> Fire </h1>
+                            {pokemon.type.map((type) =>
+                                <Badge variant="outline" 
+                                        className={`text-${typeColors[type.pokemon_v2_type.name as keyof typeof typeColors]} 
+                                                    border-${typeColors[type.pokemon_v2_type.name as keyof typeof typeColors]} 
+                                                    mx-5`}
+                                        >
+                                            {type.pokemon_v2_type.name}
+                                        </Badge>
+                            )}
                         </div>
 
                         <div>
-                            <h1> Base Experience: 400 </h1>
-                            <h1> Height: 50 </h1>
-                            <h1> Weight: 100</h1>
+                            <h1> Base Experience: {pokemon.base_experience} </h1>
+                            <h1> Height: {pokemon.height} </h1>
+                            <h1> Weight: {pokemon.weight} </h1>
                         </div>
 
                         <div >
-                            <Button className="bg-green-500"> Add </Button>
+                            <Form method="post">
+                                <Button type="submit" className="bg-green-500"> Add </Button>
+                            </Form>
                             <Button variant="destructive">Remove</Button>
                         </div>
                     </div>
@@ -67,26 +82,29 @@ export default function PokemonPage() {
 
                     <TabsContent value="stats">
                         <div>
-                            hp 78 <Progress value={33} /> <br/>
-                            attack 70 <Progress value={33} /> <br/>
-                            defense 84 <Progress value={33} /> <br/>
-                            special attack 100 <Progress value={33} /> <br/>
-                            special defense 80 <Progress value={33} />
+                            {pokemon.stats.nodes.map((stat) => 
+                                    <div>
+                                        <h1> {stat.pokemon_v2_stat.name} {stat.base_stat}</h1>
+                                        <Progress value={stat.base_stat} />
+                                        <br/>
+                                    </div>
+                                )}
                         </div>
                     </TabsContent>
 
                     <TabsContent value="moves">
                         <div className="flex flex-wrap">
-                            {[...Array(6)].map((_, index) => (
-                                <div key={index} className="w-1/3 p-2">
+                            {pokemon.moves.map((move) =>
+                                <div key={move.pokemon_v2_move.name} className="w-1/3 p-2">
                                     <Card>
-                                        <CardTitle> MegaPunch</CardTitle>
+                                        <CardTitle> {move.pokemon_v2_move.name} </CardTitle>
                                         <CardContent>
-                                            <p>Level 0</p>
+                                            <p>Level {move.level}</p>
                                         </CardContent>
                                     </Card>
                                 </div>
-                            ))}
+                                )
+                            }
                         </div>
                     </TabsContent>
 

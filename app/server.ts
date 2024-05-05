@@ -1,6 +1,6 @@
-import { client } from './lib/graphql-client';
-import { Pokemon, PokemonResponse } from "~/model/Pokemon";
-import { queryPokemonAll, queryPokemonById, queryPokemonByName } from './routes/query';
+import { GraphQLClient } from "graphql-request"
+import { Pokemon, PokemonResponse, PokemonSearch } from "~/model/Pokemon";
+import { queryPokemonById, queryPokemonByName } from './lib/query';
 
 // Documentation:
 // https://medium.com/@elijahbanjo/understanding-graphql-apis-from-a-rest-api-point-of-view-08196600c667 (REST vs GraphQL)
@@ -11,23 +11,17 @@ import { queryPokemonAll, queryPokemonById, queryPokemonByName } from './routes/
 //       Mutation in graphQL can simulate POST/UPDATE requests
 //       GraphQL use resolvers for server side functionalities
 
+export const client = new GraphQLClient('https://beta.pokeapi.co/graphql/v1beta')
 
 // REST Api
-export async function getPokemonAll() {
-  const data = await client.request(queryPokemonAll)
-  return data
-}
+export async function getPokemonsByName(name: string) { // For search bar
+  if (name != "") {
+    name = name + "%"
+  }
 
-// For search bar
-export async function getPokemonsByName(name: string) {
-  // if (name != "") {
-  //   name = name + "%"
-  // }
+  const response: { pokemon_v2_pokemon: PokemonSearch[] } = await client.request(queryPokemonByName, {searchQuery: name}) 
 
-  const response: PokemonResponse = await client.request(queryPokemonByName, {searchQuery: name})
-  const pokemonInfo: Pokemon[] = response.pokemon_v2_pokemon
-
-  const cleanPokemon = pokemonInfo.map(pokemon => ({
+  const cleanPokemon = response.pokemon_v2_pokemon.map(pokemon => ({
     'id': pokemon.id,
     'name': pokemon.name
   }))
@@ -35,7 +29,7 @@ export async function getPokemonsByName(name: string) {
   return cleanPokemon
 }
 
-// For search bar
+
 export async function getPokemonById(id: number) {
   const response: PokemonResponse = await client.request(queryPokemonById, {searchQuery: id})
   const pokemonInfo: Pokemon = response.pokemon_v2_pokemon[0]
@@ -43,12 +37,22 @@ export async function getPokemonById(id: number) {
   // Match the data response with our Pokemon model
   return {
       'id': pokemonInfo.id,
-      'name': pokemonInfo.name,  
-      'type': pokemonInfo.pokemon_v2_pokemontypes[0],
+      'name': pokemonInfo.name,
+      'height': pokemonInfo.height,
+      'base_experience': pokemonInfo.base_experience,
+      'weight': pokemonInfo.weight,
+      'type': pokemonInfo.pokemon_v2_pokemontypes,  // array
       'sprite': pokemonInfo.pokemon_v2_pokemonsprites[0],
+      'stats': pokemonInfo.pokemon_v2_pokemonstats_aggregate,  // array
+      'moves': pokemonInfo.pokemon_v2_pokemonmoves  // array
   }
 }
 
+
+export async function createPokemon() {
+  const data = { key: 'value' };
+  localStorage.setItem('Pikachu', JSON.stringify(data))
+}
 
 
 // const resolvers = {
